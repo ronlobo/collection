@@ -6,7 +6,7 @@
 
 import "dart:collection";
 import "package:collection/collection.dart";
-import "package:unittest/unittest.dart";
+import "package:test/test.dart";
 
 // Test that any member access/call on the wrapper object is equal to
 // an expected access on the wrapped object.
@@ -23,10 +23,8 @@ void testInvocations(Invocation i1, Invocation i2) {
   expect(i1.namedArguments, equals(i2.namedArguments), reason: name);
 }
 
-/**
- * Utility class to record a member access and a member access on a wrapped
- * object, and compare them for equality.
- */
+/// Utility class to record a member access and a member access on a wrapped
+/// object, and compare them for equality.
 abstract class Expector {
   getWrappedObject(action(Invocation i));
   // Hack to test assignment ([]=) because it doesn't return the result
@@ -38,7 +36,9 @@ abstract class Expector {
     testInvocations(m, m2);
   }));
 
-  toString() => new _Equals(equals = getWrappedObject((m2) {
+  // dartanalyzer complains if this method is named `toString()`, since, if it
+  // truly overrides Object's `toString()`, it should return a String.
+  asString() => new _Equals(equals = getWrappedObject((m2) {
     testInvocations(TO_STRING_INVOCATION, m2);
   }));
 }
@@ -85,7 +85,6 @@ const TO_STRING_INVOCATION = const SyntheticInvocation(
 // argument to DelegatingIterable/Set/List.
 class IterableNSM extends NSM implements Iterable, Set, List, Queue {
   IterableNSM(action(Invocation i)) : super(action);
-  noSuchMethod(Invocation i) => super.noSuchMethod(i);  // Silence warnings
   toString() => super.noSuchMethod(TO_STRING_INVOCATION);
 }
 
@@ -120,7 +119,6 @@ class QueueExpector extends Expector {
 // Like NSM but implements Map to allow as argument for DelegatingMap.
 class MapNSM extends NSM implements Map {
   MapNSM(action(Invocation i)) : super(action);
-  noSuchMethod(Invocation i) => super.noSuchMethod(i);
   toString() => super.noSuchMethod(TO_STRING_INVOCATION);
 }
 
@@ -147,7 +145,7 @@ void main() {
     expect.first.equals.first;
     // Default values of the Iterable interface will be added in the
     // second call to firstWhere, so we must record them in our
-    // expectation (which doesn't have the interface implementat or
+    // expectation (which doesn't have the interface implemented or
     // its default values).
     expect.firstWhere(func1, orElse: null).equals.firstWhere(func1);
     expect.firstWhere(func1, orElse: func0).equals.
@@ -176,7 +174,7 @@ void main() {
     expect.toList(growable: true).equals.toList(growable: true);
     expect.toList(growable: false).equals.toList(growable: false);
     expect.toSet().equals.toSet();
-    expect.toString().equals.toString();
+    expect.asString().equals.toString();
     expect.where(func1).equals.where(func1);
   }
 
@@ -262,7 +260,7 @@ void main() {
     expect.putIfAbsent(val, func0).equals.putIfAbsent(val, func0);
     expect.remove(val).equals.remove(val);
     expect.values.equals.values;
-    expect.toString().equals.toString();
+    expect.asString().equals.toString();
   }
 
   // Runs tests of Set behavior.

@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import "package:collection/collection.dart";
-import "package:unittest/unittest.dart";
+import "package:test/test.dart";
 
 void main() {
   group("with an empty canonicalized map", () {
@@ -20,6 +20,13 @@ void main() {
 
     test("get returns null for uncanonicalizable key", () {
       expect(map["foo"], isNull);
+    });
+
+    test("set affects nothing for uncanonicalizable key", () {
+      map["foo"] = "value";
+      expect(map["foo"], isNull);
+      expect(map.containsKey("foo"), isFalse);
+      expect(map.length, equals(0));
     });
 
     test("canonicalizes keys for addAll", () {
